@@ -4,3 +4,4 @@ ch1
     scanner.Scan() 将系统缓冲区读到自己的临时缓冲区
     scanner.Text() 取出临时缓冲区的内容
     os.Open()      形参1是字符串，即文件路径 返回值1
+    os.ReadFile()  
