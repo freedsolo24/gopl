@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // 打印重复的行, 输出stdin中出现2次及以上的行,涉及 map, bufio包. 以下案例是流式输入.
@@ -32,7 +33,7 @@ func dup1() {
 	}
 }
 
-// 从文件列表或标准输入读取
+// 从文件列表或标准输入读取, 属于流式输入
 func dup2() {
 	// make一个容器
 	counts := make(map[string]int)
@@ -67,8 +68,31 @@ func dup2() {
 	}
 }
 
+// 通过os.ReadFile函数一次性读取到大块内存
 func dup3() {
+	counts := make(map[string]int)
+	files := os.Args[1:]
 
+	for _, file := range files {
+		// 拿到的文本文件是字节流, 类型是[]byte
+		data, err := os.ReadFile(file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dup3:%s\n", err)
+			continue
+		}
+		fmt.Printf("文件:%s\n", file)
+		// Split函数作用: 按照\n分隔字节流, 每一段放入切片
+		for _, line := range strings.Split(string(data), "\n") {
+			counts[line] = counts[line] + 1
+		}
+		for line, n := range counts {
+			if n > 1 {
+				fmt.Printf("重复的行:%s, 重复的次数:%d\n", line, n)
+			}
+		}
+		clear(counts)
+		fmt.Println()
+	}
 }
 
 func countLines(r *os.File, m map[string]int) {

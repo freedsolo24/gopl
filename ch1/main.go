@@ -10,6 +10,7 @@ func main() {
 	// echo3()
 	fmt.Println("1.3 案例题")
 	// dup1()
-	dup2()
+	// dup2()
+	dup3()
 
 }
