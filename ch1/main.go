@@ -21,7 +21,7 @@ func main() {
 	// fetchall()
 	fmt.Println("1.7 案例题")
 	// server1()
-	server2()
-	// server3()
+	// server2()
+	server3()
 
 }

@@ -68,6 +68,7 @@ func server3() {
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
 
+// http.Request是一个结构体，里面是http请求
 func handlerServer3(w http.ResponseWriter, r *http.Request) {
 	// 打印http行首
 	fmt.Fprintf(w, "%s %s %s\n", r.Method, r.URL, r.Proto)
@@ -76,7 +77,7 @@ func handlerServer3(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Header {
 		fmt.Fprintf(w, "Header[%q]=%q\n", k, v)
 	}
-	// 打印服务端的主机
+	// 取请求报文中的主机字段，打印服务端的主机
 	fmt.Fprintf(w, "Host=%q\n", r.Host)
 	// 打印客户端的ip
 	fmt.Fprintf(w, "RemoteAddr=%q\n", r.RemoteAddr)
@@ -88,7 +89,7 @@ func handlerServer3(w http.ResponseWriter, r *http.Request) {
 
 	// 遍历表单
 	for k, v := range r.Form {
-		fmt.Fprintf(w, "Form[%q]=%q\n", k, v)
+		fmt.Fprintf(w, "Form[%q]=%s\n", k, v)
 	}
 
 	// os.Stdout, io.Discard, reponse writer 3个结构类,既是又是, 可以赋值给writer

@@ -237,9 +237,9 @@
     ```
     http.ListenAndServe()
         函数
-        作用:
-        形参1:
-        形参2:
+        作用:   监听
+        形参1:  string, 监听的地址和端口
+        形参2:  handler操作函数
         返回值: err
     
     ServerMux
@@ -255,13 +255,26 @@
             }
         ```
         所以 ServeHTTP 方法会用 默认 mux 来分发请求。
-        来了新连接只是启动了一个 goroutine，调用
+        来了新连接只是启动了一个 goroutine，调用这个 handler 其实就是 mux（或你自己传入的 ServeMux），它不会新建 mux，只是用已经注册好的 mux 去查找匹配路径，并分发给你注册的 handler。
+
+* 1.7 示例体
+    r.Header
+        作用:  属性, 类型map[string][]string
+    r.ParseForm()
+        方法
+        作用:   解析来自 URL 的 query 参数（比如 ?name=david&age=18）和 POST 表单数据，统一放到 r.Form 这个 map 里
+        形参:   无形参
+        返回值: err
+    r.Form()
+        是一个 map[string][]string，可以遍历所有表单字段
+        类型: map[string][]string
+             key是string, value是切片里面是string元素, 表示多个字段, 每个字段有很对的值
+        例如: 
         ```go
-            来了新连接只是启动了一个 goroutine，调用
+            http://localhost:8000/?name=David&hobby=Go&hobby=Music
+            ["name"]["David"]
+            ["hobby"]["Go" "Music"]
         ```
-        这个 handler 其实就是 mux（或你自己传入的 ServeMux），它不会新建 mux，只是用已经注册好的 mux 去查找匹配路径，并分发给你注册的 handler。
-
-
 
 
     
