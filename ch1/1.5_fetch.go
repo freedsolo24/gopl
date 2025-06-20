@@ -9,6 +9,7 @@ import (
 )
 
 // 从指定的url里, 解析信息
+// 这相当于写了一个客户端
 func fetch1() {
 
 	urls := os.Args[1:]

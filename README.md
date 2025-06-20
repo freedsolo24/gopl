@@ -275,6 +275,15 @@
             ["name"]["David"]
             ["hobby"]["Go" "Music"]
         ```
+# ch2
+* 1.6示例
+    strconv.ParseFloat
+        函数
+        作用: 把第一个string类型的形参, 解析成float类型的数值
+        形参1: string类型
+        形参2: 指定返回值是64bit, 还是32bit
+        返回值1: float类型
+        返回值2: err
 
 
     

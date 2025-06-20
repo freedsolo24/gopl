@@ -18,6 +18,7 @@ func server1() {
 	// 它是一个“默认兜底”的 handler, 它会匹配所有没有更具体匹配项的请求路径
 	http.HandleFunc("/", handler)
 
+	// 这里的hanler函数填入nil, 会使用底层全局默认的, 会和自己定义的handler形成呼应
 	err := http.ListenAndServe("localhost:8000", nil)
 	log.Fatal(err)
 }
