@@ -50,10 +50,13 @@
     fmt.Fprintf()
         函数
         作用:   把报错写入文件, stderr, stdin
-        形参1:  实现io.Writer接口的实例, 可以是文件, stdin, stderr
+        形参1:  实现io.Writer接口的实例, 可以是文件, stdin, stderr, bytes.buffer
         形参2:  输出的格式字符串, 和fmt.Printf一样
         形参3:  格式化的值
         返回值: 写入的字节数
+    fmt.Fprintf()和fmt.Printf()的区别
+        Printf:  输出的是终端
+        Fprintf: 输出的是实现了Writer接口的实例
     http.Get()
         函数
         作用:    发起http url的请求, 得到响应
@@ -284,6 +287,82 @@
         形参2: 指定返回值是64bit, 还是32bit
         返回值1: float类型
         返回值2: err
-
-
-    
+    func init() { ... }
+        init函数
+        作用: 包中的init函数在包导入的时候, 最先执行. 在此函数中用来初始化一个数据表的变量pc[265]byte, 让pc这个数组变量执行后里面有值
+        init函数不能被调用和引用
+# ch3
+* 3.5.4示例
+    strings.LastIndex()
+        函数
+        作用: 判断字符串中, 指定字符的最后一个索引号
+        形参1: 字符串
+        形参2: 字符
+        返回值: 索引id
+    strings.Contains(s, substr string) bool
+        函数
+        作用: 字符串s, 是否包含子串
+    strings.Count(s, sep string) int
+        函数
+        作用: 字符串s, 有几个字串的个数 
+    strings.Fields(s string) []string
+        函数
+    strings.HasPrefix(s, prefix string) bool
+        函数
+        作用: 字符串s, 是否有前缀子串
+    strings.Index(s, sep string) int
+        函数
+        作用: 字符串s, 里面的sep子串, 索引id
+    strings.Join(a []string, sep string) string
+        函数
+        作用: 把sep字串放在字符串切片里面
+    bytes.Contains(b, subslice []byte) bool
+        函数
+        作用: 字节流b, 是否包含子字节流
+    bytes.Count(s, sep []byte) int
+        函数
+        作用: 
+    bytes.Fields(s []byte) [][]byte
+        函数
+    bytes.HasPrefix(s, prefix []byte) bool
+        函数
+    bytes.Index(s, sep []byte) int
+        函数
+    bytes.Join(s [][]byte, sep []byte) []byte
+        函数
+    bytes.Buffer
+        结构体
+        作用: 提供了一个可增长的字节缓冲区，你可以往里面追加内容(byte, string, 其他buffer), 内部维护一个[]byte
+        实现了io.Writer接口, 可以传给Fprintf()
+    buf.WriteByte()
+        方法
+        作用: buf实例, 调用WriteByte方法, 往buf实例后面追加一个ASCII字符
+        形参: 1个byte类型的ASCII码字符
+        返回值: err 
+    buf.WriteString()
+        方法
+        作用: buf实例, 调用WriteString方法, 往buf后面追加一个字符串
+        形参: 往buf实例后面追加的字符串
+        返回值1: 写入字符串的长度
+        返回值2: err 
+    buf.String()
+        方法
+        作用: buf实例, 调用String方法, 把实例整个缓冲区返回成string
+        无形参
+        返回值: string类型
+    strconv.Itoa()
+        函数
+        作用: 将int转换成string
+        strconv.Itoa(123)  // "123"
+    strconv.FormatInt()
+        函数
+        作用: 不同进制的转换
+        例子: strconv.FormatInt(int64(123), 2)   // "11111011"
+    strconv.Atoi()
+        函数
+        例子: strconv.Atoi("123")  // 123
+    strconv.ParseInt()
+        例子: strconv.ParseInt("123", 10, 64)
+    strconv.Atoi()和strconv.ParseInt()的区别
+        Atoi: 单纯的将String转成Int
+        ParseInt: 灵活, 将string, 根据10,16进制转换, 转换后装进int64的类型中

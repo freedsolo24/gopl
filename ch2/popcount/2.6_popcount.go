@@ -59,3 +59,13 @@ func PopCount(x uint64) int {
 		pc[byte(x>>(6*8))] +
 		pc[byte(x>>(7*8))])
 }
+
+func PopCountLoop(x uint64) int {
+	sum := 0
+	for i := 0; i < 64; i++ {
+		if (x>>i)&1 == 1 {
+			sum++
+		}
+	}
+	return sum
+}

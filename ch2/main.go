@@ -70,8 +70,10 @@ func conv(ss []string) {
 			kgtop, k, tempconv.KilogramtoPound(k))
 		fmt.Println("================")
 	}
-	x := uint64(0x0f0f0f0f0f0f0f0f)
+	a := uint64(0x0f0f0f0f0f0f0f0f)
+	fmt.Println(popcount.PopCount(a))
 
-	fmt.Println(popcount.PopCount(x))
+	b := uint64(0x0f0f0f0f0f0f0f0f)
+	fmt.Println(popcount.PopCountLoop(b))
 
 }
