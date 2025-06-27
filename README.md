@@ -347,9 +347,12 @@
         返回值2: err 
     buf.String()
         方法
-        作用: buf实例, 调用String方法, 把实例整个缓冲区返回成string
+        作用: buf实例, 调用String方法, 把实例整个缓冲区返回成string, string是固定不变的不能修改里面的内容
         无形参
         返回值: string类型
+    buf.Bytes()
+        方法
+        作用: buf实例, 调用Bytes方法, 把实例整个缓冲区返回成[]byte, 这样可以操作这个字符串
     strconv.Itoa()
         函数
         作用: 将int转换成string
@@ -366,3 +369,10 @@
     strconv.Atoi()和strconv.ParseInt()的区别
         Atoi: 单纯的将String转成Int
         ParseInt: 灵活, 将string, 根据10,16进制转换, 转换后装进int64的类型中
+    strings.SplitN()
+        函数
+        作用: 对指定的分隔符, 最多分成N个子串.
+        形参1: 字符串string
+        形参2: 分隔符
+        形参3: 分成几个子串. n=0: 不分, n<0: 不限分割次数
+        返回值: []string, 分出来的子串装到[]string中

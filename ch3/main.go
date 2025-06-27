@@ -11,5 +11,7 @@ func main() {
 	// 	fmt.Printf("              %s\n", comma(arg))
 
 	// }
-	fmt.Println(intsToStrings([]int{1, 2, 3, 4, 5, 6, 7}))
+	// fmt.Println(intsToStrings([]int{1, 2, 3, 4, 5, 6, 7}))
+
+	fmt.Println(comma4("-123456.89"))
 }
