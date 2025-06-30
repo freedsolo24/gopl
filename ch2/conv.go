@@ -1,4 +1,4 @@
-package tempconv
+package main
 
 func CtoF(c Celsius) Fahrenheit {
 	return Fahrenheit(c*9/5 + 32)

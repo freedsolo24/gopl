@@ -14,9 +14,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"gopl.com/ch2/popcount"
-	"gopl.com/ch2/tempconv"
 )
 
 func main() {
@@ -43,12 +40,12 @@ func conv(ss []string) {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "err: %v\n", err)
 		}
-		c := tempconv.Celsius(fl)
-		f := tempconv.Fahrenheit(fl)
-		m := tempconv.Meter(fl)
-		mi := tempconv.Mile(fl)
-		p := tempconv.Pound(fl)
-		k := tempconv.Kilogram(fl)
+		c := Celsius(fl)
+		f := Fahrenheit(fl)
+		m := Meter(fl)
+		mi := Mile(fl)
+		p := Pound(fl)
+		k := Kilogram(fl)
 
 		// 我为自定义的类型: Celsius, Fahrenheit 自定义了String方法
 		// 两个自定义的类型: 自动实现了Stringer接口
@@ -62,18 +59,18 @@ func conv(ss []string) {
 		mitom := fmt.Sprintf("英里转米:")
 		ptokg := fmt.Sprintf("磅转千克:")
 		kgtop := fmt.Sprintf("千克转磅:")
-		fmt.Printf("%-6s %s=%s,%6s %s=%s\n", ctof, c, tempconv.CtoF(c),
-			ftoc, f, tempconv.FtoC(f))
-		fmt.Printf("%-7s %s=%s,%7s %s=%s\n", mtomi, m, tempconv.MtoMI(m),
-			mitom, mi, tempconv.MItoM(mi))
-		fmt.Printf("%-7s %s=%s,%6s %s=%s\n", ptokg, p, tempconv.PoundtoKilogram(p),
-			kgtop, k, tempconv.KilogramtoPound(k))
+		fmt.Printf("%-6s %s=%s,%6s %s=%s\n", ctof, c, CtoF(c),
+			ftoc, f, FtoC(f))
+		fmt.Printf("%-7s %s=%s,%7s %s=%s\n", mtomi, m, MtoMI(m),
+			mitom, mi, MItoM(mi))
+		fmt.Printf("%-7s %s=%s,%6s %s=%s\n", ptokg, p, PoundtoKilogram(p),
+			kgtop, k, KilogramtoPound(k))
 		fmt.Println("================")
 	}
 	a := uint64(0x0f0f0f0f0f0f0f0f)
-	fmt.Println(popcount.PopCount(a))
+	fmt.Println(PopCount(a))
 
 	b := uint64(0x0f0f0f0f0f0f0f0f)
-	fmt.Println(popcount.PopCountLoop(b))
+	fmt.Println(PopCountLoop(b))
 
 }
