@@ -1,4 +1,5 @@
-// 计算两个SHA256哈希码中不同bit的数目
+// 1. 计算传入一个字符串, 转换sha256的哈希值后, 这一串数字有几个1, 几个0
+// 2. 传入两个字符串, 转换成2个sha256哈希值, 统计两个sha256哈希值, 不同的bit的个数
 package main
 
 import (
@@ -45,5 +46,25 @@ func convshaPopcount(s string) (int, int) {
 		sum0 += int(pc0[v])
 	}
 	return sum1, sum0
+
+}
+
+// 统计两个sha256哈希值, 不同的bit的个数
+// 思路: 两个哈希值比较不同的bit个数, 用异或, 相同为0, 不同为1
+
+func diffbit(s1, s2 string) int {
+	sha1 := sha256.Sum256([]byte(s1))
+	sha2 := sha256.Sum256([]byte(s2))
+
+	diff := 0
+	// sha1的值是 [ 2d 71 16 42 b7 26 b0 44 01 62 7c a9 fb ac 32 f5 c8 53 0f b1 90 3c c4 db 02 25 87 17 92 1a 48 81 ]
+	// sha1的值是 有32个 字节值, 所以遍历32次
+	for i := 0; i < 32; i++ {
+		// ^是两个uint8做位异或, 相同为0, 不同为1, 可能的结果是0010 0011  说明这3位相同
+		// 然后对异或结果中取有多少个1, 就是有多少个相同的bit位
+		xor := sha1[i] ^ sha2[i]
+		diff += int(pc1[xor])
+	}
+	return diff
 
 }
