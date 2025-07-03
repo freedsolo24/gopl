@@ -1,9 +1,55 @@
 package main
 
+import "fmt"
+
 func main() {
 	// // sum1, sum0 := convshaPopcount("abc")
 	// // fmt.Printf("字符串哈希后的1和0各有: 1有%d个bit, 0有%d个bit\n", sum1, sum0)
 	// // fmt.Printf("两个字符串哈希值不同的bit数:%d\n", diffbit("abc", "abcd"))
 	// flagstdin()
-	flagAlgo()
+	// flagAlgo()
+	a := [...]int{0, 1, 2, 3, 4, 5}
+	l := [...]int{1, 2, 3, 4, 5, 6, 7}
+	r := [...]int{1, 2, 3, 4, 5, 6, 7}
+	// a[:] 将数组a转换成切片类型 []int  a[:]等价于 []int{0,1,2,3,4,5}
+	// 因为传进去的是切片, 所以修改会共用底层数组a
+	// a[0:len(s)]=a[0:6] 意思是从0开始拿6个元素 0 1 2 3 4 5 结尾的索引到5
+	reverseSlice(a[:])
+	fmt.Println("就地反转", a)
+
+	// 将 slice 向左旋转 n 个元素，意味着把开头的前 n 个元素搬到 slice 的末尾，其他元素前移。
+	// 原始切片: [1 2 3 4 5 6 7]  左旋3位: [4 5 6 7 1 2 3]
+	// 原始顺序：A B  →  期望结果：B A （左旋）
+	// 第一次反转 A → A 顺序被打乱
+	// 第二次反转 B → B 顺序也被打乱
+	// 第三次整体再反转 → 两部分的“打乱顺序”叠加后，恰好成了正确的新顺序！
+	reverseLeft(l[:2]) // 反转前 n 个元素       // [3 2 1 4 5 6 7]
+	reverseLeft(l[2:]) // 反转后 len-n 个元素   // [3 2 1 7 6 5 4]
+	reverseLeft(l[:])  // 反转整个切片          // [4 5 6 7 1 2 3]
+	fmt.Println("就地左旋2次 ", l)
+
+	// 将 slice 向右旋转 n 个元素，意味着把末尾的后 n 个元素搬到 slice 的开头，其他元素后移。
+	// 原始切片: [1 2 3 4 5 6 7]  右旋3位: [5 6 7 1 2 3 4]
+	// 原始顺序：B A  →  期望结果：A B （右旋）
+	reverseRight(r[4:]) // 反转后 n 个元素       [1 2 3 4 7 6 5]
+	reverseRight(r[:4]) // 反转前 len-n 个元素   [4 3 2 1 7 6 5]
+	reverseRight(r[:])  // 整体反转              [5 6 7 1 2 3 4]
+	fmt.Println("就地右旋3次 ", r)
+	// 原始： A B      → [1 2 3 4 | 5 6 7]
+	// Step1: A B'     → [1 2 3 4 | 7 6 5]
+	// Step2: A' B'    → [4 3 2 1 | 7 6 5]
+	// Step3: (A' B')' → [5 6 7 | 1 2 3 4]
+
+	array := [6]int{1, 2, 3, 4, 5, 6}
+	reverseArray(&array)
+	fmt.Println("反转数组 ", array)
+
+	s := []int{1, 2, 3, 4, 5, 6, 7}
+	// rotateLeft(s, 3)
+	rotateRight(s, 3)
+	fmt.Println("一次循环 ", s)
+
+	s1 := []string{"a", "a", "b", "b", "b", "c", "a", "a"}
+	fmt.Println(chRepeat2(s1))
+
 }
