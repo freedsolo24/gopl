@@ -1,5 +1,5 @@
-// 删除切片中重复的字符
-// 算法: 双指针算法, 变换思路, 不用删除, 用双指针做覆盖
+// 算法1: 删除切片中重复的字符
+// 算法2: 双指针算法, 变换思路, 不用删除, 用双指针做覆盖
 package main
 
 func chRepeat1(s []string) []string {
@@ -47,24 +47,18 @@ func chRepeat2(s []string) []string {
 }
 
 // s := []string{"a", "a", "b", "b", "c", "c", "d"}
-
 // 初始:
 // readIdx=1, writeIdx=1
 // s[1]="a", s[0]="a" -> 重复，跳过
-
 // readIdx=2, s[2]="b", s[0]="a" -> 不重复，s[1]="b", writeIdx=2
-
 // readIdx=3, s[3]="b", s[1]="b" -> 重复，跳过
-
 // readIdx=4, s[4]="c", s[1]="b" -> 不重复，s[2]="c", writeIdx=3
-
 // readIdx=5, s[5]="c", s[2]="c" -> 重复，跳过
-
 // readIdx=6, s[6]="d", s[2]="c" -> 不重复，s[3]="d", writeIdx=4
-
 // 最终结果:
 // s[:4] = {"a", "b", "c", "d"}
 
+// 我理解后的逻辑, 照我理解后的逻辑写的
 func chRepeat3(s []string) []string {
 	if len(s) == 0 {
 		return s
@@ -72,12 +66,15 @@ func chRepeat3(s []string) []string {
 
 	writeIdx := 1
 	for readIdx := 1; readIdx < len(s); readIdx++ {
+		// 当前的字符和前一个字符相等, 就不要
 		if s[readIdx] == s[writeIdx-1] {
 			continue
+			// 当前的字符和前一个字符不等, 就要
 		} else {
 			s[writeIdx] = s[readIdx]
 			writeIdx++
 		}
 	}
+	// 必须有这个返回, 否则拿的是原始切片
 	return s[:writeIdx]
 }

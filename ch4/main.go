@@ -52,4 +52,20 @@ func main() {
 	s1 := []string{"a", "a", "b", "b", "b", "c", "a", "a"}
 	fmt.Println(chRepeat2(s1))
 
+	b1 := []byte("    Hello      world!     ")
+	b1 = squashSpace1(b1)
+	fmt.Printf("b1压缩空格|%s\n", string(b1))
+
+	b2 := []byte("   Hello   world!    |")
+	b2 = squashSpace2(b2)
+	fmt.Printf("b2压缩空格|%s\n", string(b2))
+
+	input := []byte("你好　  世界\t\t\t！")
+	result := squashUnicodeSpaces1(input)
+	fmt.Printf("结果: %q\n", result)
+
+	b3 := []byte("世￡ム界aプb�你好￥")
+	reverseUtf2(b3)
+	fmt.Printf("反转：%s\n", string(b3)) // 界a世
+
 }
