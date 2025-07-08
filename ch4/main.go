@@ -68,4 +68,5 @@ func main() {
 	reverseUtf2(b3)
 	fmt.Printf("反转：%s\n", string(b3)) // 界a世
 
+	charCount2()
 }

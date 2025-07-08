@@ -1,3 +1,14 @@
+```bash
+var m map[string]int        # 只是声明, 不立即分配内存. 不可直接赋值, 没有底层数据结构. 得到一个空map, 后面在动态赋值. 作用: 延迟初始化, 全局变量声明
+m["a"] = 1                  # panic
+m = make(map[string]int)    # 在这里初始化
+---
+n := make(map[string]int)   # 是初始化, 可以直接赋值, 有底层数据结构, 可以字面量赋值 map[...]{...}, 动态增加键值对
+n["a"] = 1 
+
+var s []int                 # 只是声明切片, 不立即分配内存. 不可直接赋值, 没有底层数据结构. 
+s = append(), s = make()    # 切片可以append自动分配内存
+```
 # ch1
 * 1.2 示例
     os.Args[1:]
@@ -307,6 +318,7 @@
         作用: 字符串s, 有几个字串的个数 
     strings.Fields(s string) []string
         函数
+        作用: 把字符串s, 针对一个或多个空格, 进行分割, 返回[]string
     strings.HasPrefix(s, prefix string) bool
         函数
         作用: 字符串s, 是否有前缀子串
@@ -410,29 +422,93 @@
         作用: 返回所有剩下的非 flag 参数
         形参: 无
         返回值: []string
-    4.2 切片,子切片注意的问题
-        (1) s[i:j]  切片开始从索引i开始, j表示len(s),  切片结束从索引j-1结束
-        (2) 主函数通过&array传递指针, 自定义函数形参通过*[6]int, 自定义函数中, arr[i]这是语法糖, 等价于(*arr)[i]: (*arr)指向main函数的array变量, 在用array变量取索引拿值. 注意要有小括号
-        (3) 切片s用%p打印, 打印的不是s标头值的内存地址, 是底层数组第一个元素的地址, 等价于%p &s[0]
-        (4) s = s[n:], 把s的子切片在复制给s, 此时新的s标头值要注意, 底层数组指针指向哪, 新的len有几个元素, 新的cap是从新起点到底层数组的末尾 
-        (5) 切片s[i]元素的删除: append(s[:i], s[i+1:]...)  循环到第i个索引, 在s[i-1]的基础上, 追加s[i]后面的元素, 相当于把s[i]删除
-            切片不删除只保留, 用readIdx和writeIdx指针实现, 读到不一样的字符, 就复制到前面
-        (6) b[:writeIdx] 表示当前已经写好的部分; b[writeIdx:] 表示从writeIdx索引开始写入新字符
     utf8.DecodeRune()
         函数
         作用: 输入[]byte字节流, 从一个 UTF-8 编码的 []byte 字节流中，解析出第一个合法的字符（rune 类型），并返回
         形参: []byte字节流
         返回值1: []byte字节流里面的第一个rune文字字符
         返回值2: rune文字字符的长度
-    unicode.IsSpace()
+    utf8.DecodeLastRune()
         函数
-        作用: 判断输入的rune文字字符是否是空白字符: '\t', '\n', '\v', '\f', '\r', ' '
-        形参: rune文字字符
-        返回值: true | false
+        作用: 输入[]byte字节流, 从一个 UTF-8 编码的 []byte 字节流中，解析出最后一个合法的字符（rune 类型），并返回
+        形参: []byte字节流
+        返回值1: []byte字节流里面的最后一个rune文字字符
+        返回值2: rune文字字符的长度    
     utf8.EncodeRune()
         函数
         作用: 将unicode编码的, rune文字字符编码成utf8编码, 写入[]byte字节流
         形参1: utf8编码的 []byte 字节流
         形参2: unicode编码的 rune 文字字符
         返回值: 成功写入几个字节
-    
+    unicode.IsSpace()
+        函数
+        作用: 判断输入的rune文字字符是否属于这些列出的空白字符: '\t', '\n', '\v', '\f', '\r', ' '
+        形参: rune文字字符
+        返回值: true | false
+    unicode.IsLetter()
+        函数
+        作用: 判断输入的rune文字字符是否属于字母类字符, 英文字母, 汉字, 日语等语言文字
+        形参: rune文字字符
+        返回值: true | false
+    unicode.IsPunct()
+        函数
+        作用: 判断输入的rune文字字符是否属于标点符号, 有英文标点和中文标点
+        形参: rune文字字符
+        返回值: true | false
+    unicode.IsDigit()
+        函数
+        作用: 判断输入的rune文字字符是否属于数字0-9
+        形参: rune文字字符
+        返回值: true | false
+    unicode.IsControl()
+        函数
+        作用: 判断输入的rune文字字符是否属于控制符号, '\n', '\r', '\t', '\b'
+        形参: rune文字字符
+        返回值: true | false
+    unicode.Is()
+        函数
+        作用: 用来判断一个 rune 文字字符是否属于 unicode 类别或字符范围
+        形参1: Unicode 范围表，表示一个字符类别（比如字母、数字、标点等）
+        形参2: 一个文字字符 rune
+        返回值: true | false
+        例如: unicode.Is(unicode.Latin,r)
+    bufio.NewReader()
+        函数
+        作用: 创建一个带缓冲区的 Reader，用来高效读取标准输入(键盘输入)
+        形参1: 接收一个实现了 io.Reader 接口的对象(比如: os.Stdin, 文件, 网络连接等)
+        返回值: 返回Reader读句柄, 内部维护缓冲区, 可以按行、按字节、按段落 等方式读取输入，提高效率、简化读取操作
+    ReadString('\n')
+        方法
+        作用: 按行读. 直到遇到分隔符, 返回一个string
+    ReadByte('\n')
+        方法
+        作用: 返回[]byte, 不能解析中文, 因为一个汉字占3个字节(utf8编码), 所以ReadByte()只会拿到一部分字节, 可能乱码, 但ReadRune()会完整识别出一个文字字符.
+    ReadRune()
+        方法
+        作用: 从Reader中, 按 utf8 解码, 读取成一个完整的 unicode 文字字符 rune.
+        无形参
+        返回值1: 返回 unicode 文字字符, rune 类型
+        返回值2: 这个 rune 文字字符在utf8下占了多少字节
+        返回值3: err
+    unicode.ReplacementChar
+        常量
+        = '\uFFFD' 代表 invalid 码点
+    utf8.UTFMax
+        常量
+        = 4        代表 utf8 编码最大的字节数
+    io.EOF
+        是标准库io包中预定义的错误值, 用于表示输入流的结束(EOF=End Of File)
+    scanner.Split()
+        方法
+```go
+func (s *Scanner) Split(split SplitFunc)
+```
+        作用: bufio.Scanner 类型的一个方法, 它接收一个参数：SplitFunc 类型的函数，表示“如何切分输入流”。
+```go
+type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err error)
+```
+        作用: 它作用是：如何从字节流中“切出”下一个 token（标记）。比如按行、按单词、按字符。
+        用法: scanner.Split() 期望传一个函数（SplitFunc）进去，告诉它怎么切分. bufio.ScanWords 是标准库提供的一个“按单词分词”的函数变量, 告诉它我就要用单词来切分.
+    bufio.NewScanner 和 bufio.NewReader 区别
+    (1) NewScanner 默认按"行"读取, 也可以设置分词器按"单词"拆分, 适合逐行, 逐词处理文本. 不如 Reader 灵活
+    (2) NewReader 可以逐字符, 逐行, 逐分隔符, 可以读取任意格式的输入内容, 包括字节流, utf8字符等逐个读取, 处理 unicode 字符或检查无效字符
