@@ -8,6 +8,41 @@ n["a"] = 1
 
 var s []int                 # 只是声明切片, 不立即分配内存. 不可直接赋值, 没有底层数据结构. 
 s = append(), s = make()    # 切片可以append自动分配内存
+---
+# {...}字面量定义 必须是复合类型, 复合类型前面必须加类型: 数组,切片,map,结构体
+---
+var title []struct{Title string}  # 匿名结构体定义
+---
+type IssuesSearchResult struct {
+	TotalCount int      `json:"total_count"`
+	Items      []*Issue `json:"items"`
+}
+# 核心点是(1)内存效率, (2)共享底层数据, (3)空值处理
+# (1) Items是一个切片, 切片里每一个元素指向Issue结构体的指针. Items切片只存储指向这些实例的指针, 当这个结构体被操作时, 只传递指针节省内存.
+# (2) 指针允许多个地方引用同一个Issue实例, 如果某个地方修改 Issue 字段, 所有引用该指针的地方都会反应这个变化
+# (3) []*Issue 允许 Issue 为 nil, 表示元素为初始化或无效. []Issue 每个元素都会初始化为 Issue 的零值, 无法表示"缺失状态"
+---
+type IssuesSearchResult struct {
+	TotalCount int      `json:"total_count"`
+	Items      []*Issue `json:"items"`
+}
+var result IssuesSearchResult
+# 声明并初始化结构体变量. 自动分配零值内存空间. TotalCount 初始化为0, Items 初始化为 nil
+# 显示初始化
+result := IssuesSearchResult {
+    TotalCount: 0,
+    Items:      []*Issue{}
+}
+# 使用 new 初始化, 返回的是指针
+result := new(IssuesSearchResult)
+# 短格式声明
+result := IssuesSearchResult{}
+# 如果结构体包含 slice 或 map 字段，且需要非 nil 值，则需要手动初始化这些字段
+result := IssuesSearchResult {
+    Items: make([]*Issue, 0), // 初始化为空切片
+}
+# 数组, 结构体是值类型, 不需要 make(), 可以使用 new()
+# slice, map, channel 引用类型, 才需要 make(). make() 的本质是构造标头值(len, cap)
 ```
 # ch1
 * 1.2 示例
@@ -70,8 +105,8 @@ s = append(), s = make()    # 切片可以append自动分配内存
         Fprintf: 输出的是实现了Writer接口的实例
     http.Get()
         函数
-        作用:    发起http url的请求, 得到响应
-        形参:    url, string类型
+        作用: 发起http url的请求, 得到响应
+        形参:  url, string类型
         返回值1: http.response结构类实对
         返回值2: err
     resp.Body
@@ -512,3 +547,162 @@ type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, err err
     bufio.NewScanner 和 bufio.NewReader 区别
     (1) NewScanner 默认按"行"读取, 也可以设置分词器按"单词"拆分, 适合逐行, 逐词处理文本. 不如 Reader 灵活
     (2) NewReader 可以逐字符, 逐行, 逐分隔符, 可以读取任意格式的输入内容, 包括字节流, utf8字符等逐个读取, 处理 unicode 字符或检查无效字符
+    json.Marshal()
+        函数
+        作用: 序列化json字符串
+        形参1: 结构体实例
+        返回值1: []byte字节流
+        返回值2: err
+    json.MarshalIndent()
+        函数
+        作用: 有缩进的输出
+        形参1: 结构体实例
+        形参2: 前缀
+        形参3: 缩进几个空格
+        返回值1: []byte字节流
+        返回值2: err
+    json.Unmarshal()
+        函数
+        作用: 接收一个完整的 JSON 字节切片, 一次性解析所有内容, 装到结构体实例的指针类型变量中.
+        形参1: json序列化字节流 []byte
+        形参2: 装到结构体实例
+        返回值: err
+    url.QueryEscape()
+        函数
+        作用: 将传入的字符串 []string 构建成 HTTP 请求的查询参数. 它会把不能直接出现在 URL 查询参数中的字符（如空格、中文、特殊符号）进行转义.将输入字符串 s 编码为 URL 查询参数安全的格式
+        ' '     + 或 %20
+        ?       %3F
+        &       %26
+        =       %3D
+        :       %3A
+        /       %2F
+        例如: url.QueryEscape("repo:golang/go is:open json decoder") -> "repo%3Agolang%2Fgo+is%3Aopen+json+decoder"
+        Escape: 在编程中, 指将特殊字符转换为安全形式
+    url.PathEscape 与 url.QueryEscape 区别
+        (1) url.QueryEscape 用于查询参数（?q=...），对更多字符进行编码（如 + 编码为 %2B）
+        (2) url.PathEscape 用于 URL 路径（如 /path/to/resource），对保留字符的编码更宽松（如 + 不编码）。
+    http.StatusOK
+        http 包定义的常量
+        StatusOK = 200
+    resp.StatusCode
+        成员属性
+        Response 结构体里面的 StatusCode 成员属性
+    resp.Body
+        Response 结构体里面的 Body 成员属性
+    resp.Body.Close()
+        方法
+        作用: 关闭释放响应资源
+        (1) 如果不调用 Close，可能会导致资源泄漏（如文件描述符未释放），尤其是在高并发场景下，可能耗尽系统资源
+        (2) 在高负载程序中，积累的未关闭连接可能导致系统资源耗尽（例如 "too many open files" 错误）
+        (3) HTTP/1.1 默认启用 keep-alive，允许重用 TCP 连接以提高性能. 不调用 Close 可能阻止连接被放回连接池，降低效率
+    resp.Status
+        成员属性
+        Response 结构体里面的 Status 成员属性, 用来描述 http 响应状态
+    fmt.Errorf()
+        函数
+        作用: 于根据指定的格式化字符串 format 和参数 a 创建一个新的 error 类型值. 返回值是一个实现了 error 接口的类型
+        形参1: 格式化的字符串
+        形参2: 传递要格式化的值，对应格式化字符串中的占位符
+        返回值: 一个 error 接口类型的值，包含格式化后的错误消息
+    json.NewDecoder()
+        函数
+        作用: 初始化创建 json 解码器. 设置这个解码器, 准备从 io.Reader 缓冲区里面, 流式读取 JSON 数据
+        形参1: io.Reader, 可以是 resp.Body, 即实现了 io.Reader，提供 HTTP 响应的正文数据流 
+        返回值: json 解码器
+    jsonDecoder.Decode()
+        方法
+        作用: 使用之前设置的 json 解码器, 执行解码操作, 从数据流中读取 json 数据, 将解析后的 json 数据填充到结构体指针变量中, 根据结构体字段的 json 标签（如 json:"total_count"）映射字段
+        形参1: 解码后, 放入的结构体实例的内存地址
+        返回值: error接口
+    json.Decode()和json.Unmarshal() 区别
+        (1) Unmarshal() 需要一个 []byte 包含完整的 JSON 数据; Decode() 从 io.Reader（如 resp.Body）流式读取 JSON 数据
+        (2) Unmarshal() 一次性读取所有数据到内存; Decoder() 流式处理, 适合大 json 数据, 适合网络流
+    io.ReadAll()
+        函数
+        作用: 读取整个响应正文到[]byte
+        形参: resp.Body
+        返回值1: []byte
+        返回值2: error
+    url.Values()
+        类型 map[string][]string 的别名
+        作用: 用于构建和管理 URL 的查询参数（即 URL 中 ? 后面的部分）
+        键是字符串 值是字符串切片
+    v.Set()
+        方法
+        作用: 用于构建 url 查询参数. 将某个键设置为单一值，覆盖该键的任何现有值. 如果键已存在，Set 会替换其值（不像 Add，后者追加值
+        设置键值对: 如 q, per_page, page, sort, order
+    v.Add()
+        方法
+        作用: 用于构建 url 查询参数. 如果键已存在，Add 会追加值
+    v.Encode()
+        方法
+        作用: 用于构建 url 查询参数. 将 url.Values 转换为 URL 编码的查询字符串
+    url.Parse()
+        函数
+        作用: 将字符串 URL 解析为 url.URL 结构体，方便操作 URL 的各部分（如 Scheme, Host, Path, RawQuery）
+        解析基础 URL
+    u.RawQuery
+        RawQuery 是 url 结构体中的成员属性
+        作用: 设置或获取 URL 的查询部分（? 后面的内容）
+
+```go
+q := url.QueryEscape(strings.Join(terms, " "))
+v := url.Values{}
+v.Set("q", q)
+v.Set("per_page", "100")
+v.Set("sort", sortBy)
+v.Set("order", order)
+// q=json+decoder+repo:golang/go+is:open+is:issue, per_page=100, sort=created, order=asc
+u:=url.Parse("https://api.github.com/search/issues")
+u.RawQuery=v.Encode()
+
+```
+    os.ReadFile()
+        函数
+        作用: 给一个路径文件名, 解析, 返回文件的内容.
+        形参: 路径
+        返回值1: []byte
+        返回值2: error
+    os.MkdirAll()
+        函数
+        作用: 创建目录
+        形参1: string, 目录位置
+        形参2: 权限
+        返回值: error
+    filepath.Join()
+        函数
+        作用: 拼接成文件路径
+    os.Stat()
+        函数
+    os.WriteFile()
+        函数
+    time.Sleep
+    time.Millisecond
+    fmt.Errorf()
+        函数
+        作用: 将原始错误包装到新的错误中
+```go
+    err := errors.New("原始错误")
+    wrapped := fmt.Errorf("出错啦: %w", err)
+    fmt.Println(wrapped)  // 打印: 出错啦: 原始错误
+
+    // 判断或提取原始错误
+    if errors.Is(wrapped, err) {
+        fmt.Println("匹配上原始错误了！")
+    }
+    unwrapped := errors.Unwrap(wrapped)
+    fmt.Println("原始错误是：", unwrapped)
+```
+    
+
+
+
+
+
+
+
+
+    
+
+
+
