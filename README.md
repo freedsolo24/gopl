@@ -121,6 +121,7 @@ result := IssuesSearchResult {
         | --------- | --------------------------------- | -------------------------------| 
         | 打开文件   | `os.Open()` → `file.Read()`       | `*os.File`（实现了 `Reader`）   |
         | 打开响应体 | `http.Get()` → `resp.Body.Read()` | `*http.body`（实现了 `Reader`） |
+        resp.Body 只能读取一次, 如果先用 json.NewDecoder(resp.Body).Decode(&comic) 读取响应体，然后又用 io.ReadAll(resp.Body) 读取，导致 body 为空 
     io.ReadAll()
         函数
         作用:    从操作系统的tcp接收缓冲区, 把响应体一口气读到内存, 适合小数据
@@ -655,29 +656,84 @@ v.Set("order", order)
 // q=json+decoder+repo:golang/go+is:open+is:issue, per_page=100, sort=created, order=asc
 u:=url.Parse("https://api.github.com/search/issues")
 u.RawQuery=v.Encode()
-
 ```
     os.ReadFile()
         函数
-        作用: 给一个路径文件名, 解析, 返回文件的内容.
-        形参: 路径
-        返回值1: []byte
+        作用: 读取指定路径的文件的全部内容，返回一个字节切片（[]byte）和可能的错误. 适合读取小到中型文件（例如配置文件、JSON 数据、文本文件等）的全部内容
+        形参: 要读取的文件的路径（相对或绝对路径）
+        返回值1: 文件内容的字节切片。如果文件为空，返回空切片（[]byte{}
         返回值2: error
+        示例:
+```go
+data, err := os.ReadFile("example.txt")
+if os.IsNotExist(err) {
+    fmt.Println("File does not exist")
+} else if err != nil {
+    fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+} else {
+    fmt.Println("File content:", string(data))
+}
+```
+    bufio.Reader 和 os.ReadFile 区别
+    (1) os.ReadFile 适合小文件的读取
+    (2) bufio.Reader 适合大文件的读取, 流式读取
+```go
+file, err := os.Open("large.txt")
+defer file.Close()
+reader := bufio.NewReader(file)
+```
     os.MkdirAll()
         函数
-        作用: 创建目录
-        形参1: string, 目录位置
-        形参2: 权限
+        作用: 创建指定路径的目录（包括所有必要的父目录），并设置指定的权限模式。如果目录已存在，不会返回错误。幂等性：如果目标目录或其父目录已存在，os.MkdirAll 不会报错，直接返回 nil.
+        形参1: path string：要创建的目录路径（相对或绝对路径）。可以是多级路径（如 xkcd_data/comics）
+        形参2: 目录的权限模式（八进制表示，例如 0755）。指定新创建目录的权限
         返回值: error
+        示例:
+```go
+os.MkdirAll("data/comics/2025", 0755)
+```
     filepath.Join()
         函数
-        作用: 拼接成文件路径
+        作用: 将多个路径片段（elem）连接成一个路径字符串，使用操作系统特定的路径分隔符（/ 在 Unix，\ 在 Windows）
+        形参: 可变参数，多个路径片段（例如，目录名、文件名）
+        返回值1: 连接后的路径字符串，符合当前操作系统的路径格式
+        返回值2: error
+        示例:
+```go
+path := filepath.Join("xkcd_data", "2025", "07", "571.json")
+fmt.Println(path) // Unix: xkcd_data/2025/07/571.json, Windows: xkcd_data\2025\07\571.json
+```
     os.Stat()
         函数
+        作用: 获取指定路径的文件或目录的元信息，返回 fs.FileInfo 接口，包含文件的名称、大小、修改时间、权限等。
+        形参: 文件或目录的路径（相对或绝对路径）
+        返回值1: 文件或目录的元信息, Name() string, Size() int64, Mode() fs.FileMode, ModTime() time.Time, IsDir() bool, Sys() any
+        返回值2: error, 操作系统失败时候的错误(文件不存在, 权限不足); 成功时返回nil 
+        示例:
+```go
+info, err := os.Stat("example.txt")
+if err != nil {
+    fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+    os.Exit(1)
+}
+fmt.Printf("Name: %s\n", info.Name())
+fmt.Printf("Size: %d bytes\n", info.Size())
+fmt.Printf("IsDir: %v\n", info.IsDir())
+fmt.Printf("ModTime: %v\n", info.ModTime())
+fmt.Printf("Mode: %v\n", info.Mode())
+```
     os.WriteFile()
         函数
-    time.Sleep
-    time.Millisecond
+        作用: 将字节切片 data 写入文件 name，并设置文件权限 perm。如果文件不存在，创建新文件；如果文件已存在，覆盖原有内容。适合小到中型数据（几 KB 到 MB）
+        形参1: string, 目标文件的路径（相对或绝对路径）
+        型参2: []byte, 要写入的字节数据
+        形参3: 0644, 文件的权限模式
+        返回值: error
+        示例:
+```go
+text := []byte("Hello, World!\n")
+if err := os.WriteFile("output.txt", text, 0644); err != nil { }
+```
     fmt.Errorf()
         函数
         作用: 将原始错误包装到新的错误中
@@ -693,16 +749,103 @@ u.RawQuery=v.Encode()
     unwrapped := errors.Unwrap(wrapped)
     fmt.Println("原始错误是：", unwrapped)
 ```
-    
-
-
-
-
-
-
-
-
-    
-
+    flag.NewFlagSet()
+        函数
+        作用: 创建一个新的标志集, 然后为这个标志集创建多个标志. 允许为每个子命令定义独立的标志，例如 searchCmd 定义了 --terms 标志.
+        形参1: string, 标志集的名称，通常是子命令的名称
+        形参2: errorHandling flag.ErrorHandling：错误处理方式，有三种选项
+            * flag.ContinueOnError：遇到错误继续解析，返回错误。
+            * flag.ExitOnError：遇到错误调用 os.Exit(2) 退出程序。
+            * flag.PanicOnError：遇到错误触发 panic。
+        返回值: *flag.FlagSet：返回新创建的标志集，允许定义和解析特定子命令的标志
+```go
+downloadCmd := flag.NewFlagSet("download", flag.ExitOnError)
+```
+    NewFlagSet.String()
+        方法
+        作用: 为指定的 FlagSet 定义一个字符串类型的命令行标志，返回一个指向字符串值的指针（*string）
+        形参1: 标志的名称，用于命令行输入（例如 --terms 或 -terms）
+        形参2: 标志的默认值，如果用户未提供该标志，则使用此值
+        形参3: 标志的帮助信息，描述标志的用途，显示在 --help 或错误提示中
+        返回值: *string, 指向标志值的指针, 指向的是用户输入的字符串
+```go
+searchTerms := searchCmd.String("terms", "", "Search terms (comma-separated)")
+./xkcd-tool search --terms "sleep,insomnia"
+*searchTerms 的值为"sleep, insomnia"
+```
+    NewFlagSet.Parse()
+        方法
+        作用: 解析给定的命令行参数，根据 FlagSet 中定义的标志提取值，并存储到对应的标志变量中。如果解析失败，根据 FlagSet 的错误处理模式（例如，flag.ExitOnError）处理错误
+        形参: 要解析的命令行参数切片, 通常是 os.Args[1:], os.Args[2:]
+        返回值: error
+        示例
+```go
+./xkcd-tool search --terms "sleep,insomnia" extra
+os.Args 是 ["./xkcd-tool", "search", "--terms", "sleep,insomnia"]
+os.Args[2:] 是 ["--terms", "sleep,insomnia", "extra"]
+searchCmd.Parse 识别 --terms 标志, 将 "sleep,insomnia" 赋值给 *searchTerms. 忽略非标志参数 extra, 保留在 searchCmd.Args()
+```
+    os.Getenv()
+        函数
+        作用: 获取环境变量的值。如果环境变量不存在，返回空字符串
+        形参: 要查询的环境变量的值
+        示例:
+```go
+apiKey := os.Getenv("API_KEY")
+export API_KEY=abc123
+```
+    NewFlagSet.Usage()
+        方法
+        作用: 调用 flagSet.Usage() 打印子命令的用法，通常包括标志名称、默认值和描述。默认输出到 os.Stderr. 在参数缺失或无效时调用 Usage，提供清晰提示
+        示例:
+```go
+searchCmd := flag.NewFlagSet("search", flag.ExitOnError)
+searchTerms := searchCmd.String("terms", "", "Search terms (comma-separated)")
+searchCmd.Usage = func() {
+    fmt.Fprintf(searchCmd.Output(), "Usage: %s search --terms <terms>\n", os.Args[0])
+    fmt.Fprintf(searchCmd.Output(), "Example: %s search --terms \"sleep,insomnia\"\n", os.Args[0])
+    fmt.Fprintf(searchCmd.Output(), "Search XKCD comics by terms\n")
+    searchCmd.PrintDefaults()
+}
+switch os.Args[1] {
+case "search":
+    searchCmd.Parse(os.Args[2:])
+    if *searchTerms == "" {
+        searchCmd.Usage()
+        os.Exit(1)
+    }
+```
+    NewFlagSet.PrintDefaults()
+        方法
+        作用: 将 FlagSet 中定义的所有标志的名称、默认值和使用说明打印到 flagSet.Output()（默认 os.Stderr）
+    filepath.Ext
+        函数
+        作用: 用于提取文件路径的扩展名, 包括点. 如果没有扩展名，返回空字符串
+        形参: string, 要提取扩展名的文件路径或文件名
+        返回值: 文件扩展名（包括点，如 .jpg
+        示例:
+```go
+filepath.Ext("image.jpg")  // 输出: .jpg
+```
+    strings.ReplaceAll()
+        函数
+        作用: 字符替换
+        形参1: string, 要处理的字符串
+        形参2: old string
+        形参3: new string
+        返回值: 替换后的新字符串, 原字符串不变. 如果 old 不存在于 s 中，返回 s 的副本
+    os.Create()
+        函数
+        作用: 创建新文件, 如果存在会被覆盖
+        形参: 文件路径
+        返回值1: 文件句柄
+        返回值2: error
+    io.Copy
+        函数
+        作用: 拷贝数据
+        形参1: dst io.Writer
+        形参2: src io.Reader
+        返回值1: 写了多少字节
+        返回值2: error
 
 
